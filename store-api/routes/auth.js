@@ -51,7 +51,7 @@ router.get('/timeout', function (req, res) {
         'Connection': 'keep-alive',
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache-control',
-        'Access-Control-Allow-Origin': 'http://localhost:3001'
+        'Access-Control-Allow-Origin': 'http://localhost:3000'
     });
 
     let warnTimeout, unauthTimeout;

@@ -33,7 +33,7 @@ app.use(express.json());
 // sets http headers to secure express app 
 app.use(helmet());
 app.use(cors({
-    "origin":["http://localhost:3001"],
+    "origin":["http://localhost:3000"],
     "methods":['GET','HEAD','PUT','PATCH','POST','DELETE'],
     "credentials":true
 }));

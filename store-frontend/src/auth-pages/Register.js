@@ -62,6 +62,8 @@ const Login = function () {
             );
           } else if (user === 'duplicate') {
             setCustomAlert(true, 'use email and username which have not been taken');
+          } else {
+            setCustomAlert(true, user); // user can also be a message when no Member
           }
         }
       } catch (error) {

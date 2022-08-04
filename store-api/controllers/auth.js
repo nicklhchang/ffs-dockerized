@@ -30,34 +30,21 @@ const register = async function(req,res,next) {
                 });
             })
             .catch(function(error) {
-                // if using existing but mismatched username and email comes into here
-                res.json({
+                error.errors?.email 
+                // if email invalid (mongoose checks and throws err if so)
+                ? res.json({
+                    requestSuccess:true,
+                    loginSuccess:false,
+                    user:'invalid email'
+                })
+                // if using existing but mismatched username and email use here
+                : res.json({
                     requestSuccess:true,
                     loginSuccess:false,
                     user:'duplicate'
                 });
             });
-
             // console.log(req.isAuthenticated());
-            
-            /** username and password fields already in req.body, should be no issue
-            Member.create({ ...paramsToCreate })
-            .then(function(newMember) {
-                // here it is like we use req.body to create a new member
-                // then we use the same req.body to log you in, after you are created as a member
-                passport.authenticate('local',{
-                    failureRedirect:'/api/v1/auth/login-failure',
-                    successRedirect:'/api/v1/auth/login-success'
-                }); // passport.authenticate() cannot be used like this; just have to stick to req.login()
-            })
-            .catch(function(error) {
-                console.log(error); // for devs
-                res.json({
-                    loginSuccess:false,
-                    user:null
-                });
-            }); */
-
         } else {
             res.json({
                 requestSuccess:true,

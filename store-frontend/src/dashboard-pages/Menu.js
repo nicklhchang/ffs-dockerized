@@ -186,24 +186,14 @@ const Menu = function () {
                     // next time prev/next/goToPage is called
                     // need to use old pageLessOne below
                     setMenuPage(wholeMenu[pageLessOne - 1]);
-
-                    // pageLessOne.current -= 1;
-                    // menuPage.current = wholeMenu[pageLessOne.current];
                     break;
                 case 'next':
                     setPageLessOne((pageLessOne) => { return (pageLessOne + 1); });
                     setMenuPage(wholeMenu[pageLessOne + 1]);
-
-                    // pageLessOne.current += 1; console.log(pageLessOne);
-                    // menuPage.current = wholeMenu[pageLessOne.current]; 
-                    // console.log(wholeMenu); console.log(menuPage);
                     break;
                 case 'custom':
                     setPageLessOne(pageNum);
                     setMenuPage(wholeMenu[pageNum]);
-
-                    // pageLessOne.current = pageNum; console.log(pageLessOne);
-                    // menuPage.current = wholeMenu[pageNum]; console.log(menuPage);
                     break;
                 default:
                     throw new Error('no type matched');

@@ -36,10 +36,10 @@ const Login = function () {
     // clearFilterOptions,
     clearFilter,
     clearLocalCart,
-    localCart,
+    // localCart,
     currentSessionCookie,
-    sidebarFilterOptions,
-    changesSinceLastUpload
+    // sidebarFilterOptions,
+    // changesSinceLastUpload
   } = useDashboardContext();
   const lastCookie = useRef(currentSessionCookie);
   lastCookie.current = currentSessionCookie;
@@ -85,7 +85,7 @@ const Login = function () {
   useEffect(() => {
     // when authenticating for a new session, previous session state must be flushed out
     // make sure there is no cslu, so make user save before navigate back to auth
-    console.log(localCart, sidebarFilterOptions, changesSinceLastUpload) // from last session
+    // console.log(localCart, sidebarFilterOptions, changesSinceLastUpload) // from last session
     
     // clear localCart, sidebar filter, sidebar open, etc. in here
     clearLocalCart('reset');
