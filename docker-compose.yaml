@@ -1,0 +1,63 @@
+version: '3.9'
+
+services:
+  webapp:
+    build: ./store-frontend
+    container_name: webapp # not necessary
+    ports:
+      - "3001:3000"
+    depends_on:
+      - api
+    networks:
+      - frontend
+  api:
+    build: ./store-api
+    container_name: api # not necessary
+    environment:
+      - MONGODB_CONNSTRING=mongodb://ffs:ffsadmin@db:27017/ffsstore
+    ports:
+      - "8080:8000"
+    # links: # deprecated
+    #   - "db:mongodb"
+    depends_on:
+      - db
+    networks:
+      - backend
+      - frontend
+      # backend:
+      #   aliases:
+      #     - api
+      # frontend:
+      #   aliases:
+      #     - storeapi
+  db:
+    image: mongo:5.0
+    container_name: db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=ffs
+      - MONGO_INITDB_ROOT_PASSWORD=ffsadmin
+      - MONGO_INITDB_DATABASE=ffsstore
+    ports:
+      - "49200:27017"
+    volumes:
+      - ffsbackup:/data/db
+      - ./store-api/docker-entrypoint-initdb.d/init-mongo.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - backend
+
+volumes:
+  ffsbackup:
+    driver: local
+    external: false
+
+networks:
+  frontend:
+    driver: bridge
+    # driver_opts:
+    #   com.docker.network.bridge.enable_icc: "true" # icc only for default bridge networks
+  backend:
+    driver: bridge
+
+# webapp shell (docker desktop) curl api:8000/test works fine, but not in browser with axios
+# once outside container (e.g. browser) must use the exposed port (api is 8080) and localhost
+# browser is outside container so must use http://localhost:8080 for axios
