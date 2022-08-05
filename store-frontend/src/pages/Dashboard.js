@@ -126,7 +126,7 @@ const Dashboard = function () {
     const sessionEvent = new EventSource('http://localhost:8080/api/v1/auth/timeout', {
       withCredentials: true
     });
-
+    // notify users they now unauthenticated, their next action will unauthenticate them on frontend
     sessionEvent.addEventListener('unauthenticated', (event) => {
       // data must be in .write() to actually pick up unauthenticated event
       console.log('backend telling frontend to close', event.data)
@@ -134,22 +134,22 @@ const Dashboard = function () {
       setCustomAlert(true, 'session over now, you will need to authenticate again')
       sessionEvent.close();
     })
-
+    // notify users of however much time left is in their session
     sessionEvent.addEventListener("almost-timeout", (event) => {
       console.log(event.data);
       // server side; res.write(`event:session-timeout\ndata:{"time-left":${var}}\n\n`)
       const parsed = JSON.parse(event.data);
       // console.log(parsed, parsed["time-left"])
-      setCustomAlert(true, `${parsed["time-left"]} seconds left. Please save your cart.`)
+      setCustomAlert(true, `${parsed["time-left"]} seconds left. No rush :). Just using server-sent events.`)
       // in future, maybe let an event save cart
     });
-
+    // oopsies close sse stream on server error
     sessionEvent.addEventListener("error", (event) => {
       console.log(`gracefully handled`, event);
-      sessionEvent.close(); // when there is an error close it
+      sessionEvent.close();
     })
-
-    return () => { sessionEvent.close(); } // when unmounting
+    // cleanup when unmounting
+    return () => { sessionEvent.close(); }
   }, [setCustomAlert]);
 
   return (
@@ -158,7 +158,7 @@ const Dashboard = function () {
         <section className='nav-center'>
           {/* {alert.shown && <Alert />} */}
           <div className='nav-header'>
-            <h4>{`Dashboard for: ${currentUser ? currentUser._id : 'unauthenticated'}`}</h4>
+            <h4>{`Dashboard for: ${currentUser ? currentUser.username : 'unauthenticated'}`}</h4>
             <button className='nav-toggle' onClick={() => {
               setShowLinks(
                 (showLinks) => { return !showLinks; }

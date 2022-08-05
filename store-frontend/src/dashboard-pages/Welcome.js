@@ -24,7 +24,6 @@ const Welcome = function () {
 
   useEffect(() => {
     // fetch user cart and prices or bug when going straight to Menu and adding without visiting Cart
-    console.log('cart loaded')
     setLoading(true);
     const controller = new AbortController();
     loadCart(cart.current, controller); // loading set to false on response
@@ -39,8 +38,19 @@ const Welcome = function () {
       <SessionOver />
       {isAuthenticated &&
         <div>
-          <p>fill this with info on how to use the website</p>
-          <p>if no menu type is selected for search filter in menu, all menu types are searched</p>
+          <p>
+            squish the window sideways (horizontally) ;{`)`}. just keep squishing.
+            
+            this project uses code splitting (for prod) and memoization as optimizations
+          </p>
+          <p>
+            uses server-sent events (sse) to push notifications about session invalidation.
+            websockets a little too heavy duty, would need to upgrade backend from http server to websockets server.
+            this demo app does just fine using a client request response architecture with sse.
+          </p>
+          <p>
+            api requests using axios are also cleaned up inside useEffect() to prevent memory leaks.
+          </p>
         </div>}
     </section>
   );
