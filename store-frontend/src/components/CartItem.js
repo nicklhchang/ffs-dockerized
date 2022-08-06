@@ -4,6 +4,7 @@ import { useDashboardContext } from '../app-context/dashboardContext';
 
 const CartItem = React.memo(function ({ id, count, cost }) {
     const {
+        currentSessionCookie,
         isCartLocked,
         mutateCartCheckLock
     } = useDashboardContext();
@@ -14,16 +15,16 @@ const CartItem = React.memo(function ({ id, count, cost }) {
                 <h4>{id}</h4>
                 <h4>Cost per item: {cost}</h4>
                 <h4>Subtotal: {count * cost}</h4>
-                <button className='submit-btn' onClick={() => { mutateCartCheckLock(isCartLocked, 'remove-item', id) }}>
+                <button className='submit-btn' onClick={() => { mutateCartCheckLock(isCartLocked, 'remove-item', id, currentSessionCookie) }}>
                     Remove item
                 </button>
             </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <button className='count-btn' onClick={() => { mutateCartCheckLock(isCartLocked, 'add', id) }}>
+                <button className='count-btn' onClick={() => { mutateCartCheckLock(isCartLocked, 'add', id, currentSessionCookie) }}>
                     <FaPlus />
                 </button>
                 <span className='count'>{count}</span>
-                <button className='count-btn' onClick={() => { mutateCartCheckLock(isCartLocked, 'remove', id) }}>
+                <button className='count-btn' onClick={() => { mutateCartCheckLock(isCartLocked, 'remove', id, currentSessionCookie) }}>
                     <FaMinus />
                 </button>
             </div>

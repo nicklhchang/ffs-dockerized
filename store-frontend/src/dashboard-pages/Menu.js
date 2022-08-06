@@ -44,6 +44,7 @@ const Menu = function () {
         // causing problems if combine two useEffects, workaround is clearing on Dashboard index; Welcome
         // clearFilterOptions();
         setWholeMenu([]);
+        // probably don't need to set to empty array because next render of this route will 
         setMenuPage([]);
         // ok without because loads next user's cart on Dashboard index; Welcome
         // clearLocalCart();
@@ -235,7 +236,7 @@ const Menu = function () {
                         {wholeMenu.map((arr, menuIndex) => {
                             // in paginating with 2d array, using array index as key no problem; order no matter
                             return (
-                                <button
+                                <button className={ (menuIndex === pageLessOne) ? 'active-btn' : '' }
                                     key={arr[0]._id}
                                     onClick={() => { handlePaginateButtons({ type: 'custom', pageNum: menuIndex }) }}>
                                     {menuIndex + 1}

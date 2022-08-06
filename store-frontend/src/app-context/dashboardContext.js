@@ -36,6 +36,7 @@ const DashboardProvider = function ({ children }) {
   const [loading, setLoading] = useState(true);
   const [wholeMenu, setWholeMenu] = useState([]);
   const [itemPrices, setItemPrices] = useState({});
+  // checkedOptions and maxPrice should be states not reducers because on change must re render
   const [checkedOptions, setCheckedOptions] = useState(
     new Array(6).fill(false) // hard-coded for now
   );
@@ -142,11 +143,57 @@ const DashboardProvider = function ({ children }) {
     // setCustomAlert not wrapped in a useCallback
     [authenticate, populateCartInitial, setCustomAlert, unauthenticate])
 
-  const mutateCartCheckLock = useCallback(function (lockStatus, mutation, id) {
-    lockStatus
-      ? setCustomAlert(true, 'please wait a moment for your changes to sync')
-      : mutateLocalCart(mutation, id);
-  }, [mutateLocalCart, setCustomAlert])
+  const mutateCartCheckLock = useCallback(function (lockStatus, mutation, id, cookie) {
+    if (document.cookie === cookie) {
+      lockStatus
+        ? setCustomAlert(true, 'please wait a moment for your changes to sync')
+        : mutateLocalCart(mutation, id);
+    } else {
+      unauthenticate();
+    }
+  }, [unauthenticate, mutateLocalCart, setCustomAlert])
+
+  const uploadLocalCart = useCallback(function (source, cslu, cart) {
+    const notChanged = Object.values(cslu)
+      .every((change) => { return change === 0; });
+    /** .every() returns true by default if array empty; empty means notChanged true
+     *  all comparisons must be true for .every() to return true; only takes one falsy to ruin it
+     *  notChanged easier than changed:
+     *  so if did changed (change !== 0) takes one value of 0 (e.g. +1 -1) to set to false (incorrect
+     *  because what if other item id's have non-zero value; a change did happen)
+     *  if do notChanged (change === 0) takes one non-zero value (e.g. +1) to set to false (correct)
+     *  need double negation below as a result */
+     console.log(cslu, Object.values(cslu), notChanged)
+    if (!notChanged) {
+      lockCart();
+      axios.post('http://localhost:8080/api/v1/browse/cart/sync', {
+        cart: cart
+      }, {
+        cancelToken: source.token
+      }).then(function (response) {
+        /** 
+         * could be an issue if before promise resolves with response from backend,
+         * changesSinceLastUpload is mutated, and hence any new changes to cart 
+         * between making post request and receiving response will be cleared in this .then(). 
+         * and unless another change is made later, runs risk of front and backend carts not in sync.
+         * potential workaround is 'reconcile' local cart to backend upon session over.
+         * even then, there will be interval of time when back and frontend carts out of sync
+         * this interval of time depends on when next change (after the missed changes) is made.
+         * 
+         * have thought about locking the changesSinceLastUpload and localCart until sync resolves
+         * but using a state for that, new state only kick in after the useEffect runs; never.
+         * maybe useReducer will fix ? seems to; dispatch updates state (using useReducer) 
+         * by the end of if loop, .then() resolves after if loop runs ?
+        */
+        const { requestSuccess } = response.data;
+        if (requestSuccess) { clearChangesOnSync(); unlockCart(); }
+      }).catch(function (error) {
+        console.log(error)
+        setCustomAlert(true, 'error saving your cart')
+        unlockCart();
+      });
+    }
+  }, [lockCart, clearChangesOnSync, unlockCart, setCustomAlert])
 
   return <DashboardContext.Provider value={{
     loading,
@@ -175,7 +222,8 @@ const DashboardProvider = function ({ children }) {
     mutateLocalCart,
     clearLocalCart,
     loadCart,
-    mutateCartCheckLock
+    mutateCartCheckLock,
+    uploadLocalCart
   }}>
     {children}
   </DashboardContext.Provider>

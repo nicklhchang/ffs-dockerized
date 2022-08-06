@@ -8,7 +8,7 @@ MONGO_URI='mongodb://ffs:ffsadmin@db:27017/ffsstore'
 
 SECRET=replaceThisWithAnyLongStringYouWant
 
-After the .env file is created and fields (MONGO_URI and SECRET) are filled out, start Docker Desktop. Then head to terminal and cd into the downloaded directory (ffs-dockerized).
+After the .env file is created and fields (MONGO_URI and SECRET) are filled out, start Docker Desktop. Then head to terminal and cd into the downloaded directory (ffs-dockerized-main).
 
 Run "docker compose build", then run "docker compose up".
 
@@ -18,7 +18,7 @@ You can also play around (e.g. insert dummy data in Postman) through admin route
 
 If there is a port forwarding issue with Docker, check that no processes are running on your machine's ports 3000, 8080 and 49200.
 
-To view MongoDB data (without installing MongoDB and MongoDB Compass), open up Docker Desktop, then navigate to ffs-dockerized in Containers, and open terminal for the db container; there should be a terminal icon to the right. If you are unable to find the terminal icon, or if this feature is deprecated in future versions of Docker Desktop, you will need to find the db container id. This id sits underneath 'db' and can be copied to clipboard.
+To view MongoDB data (without installing MongoDB and MongoDB Compass), open up Docker Desktop, then navigate to ffs-dockerized-main in Containers, and open terminal for the db container; there should be a terminal icon to the right. If you are unable to find the terminal icon, or if this feature is deprecated in future versions of Docker Desktop, you will need to find the db container id. This id sits underneath 'db' and can be copied to clipboard.
 
 Then head to terminal and run "docker exec -it id /bin/sh", where you replace id with the long string that you can now paste from your clipboard. NOTE: this command works on macOS and linux distributions which have Docker installed and which use zsh or bash in terminal. However, /bin/sh at the end of the command will be different for Windows Command Prompt and Powershell (does not use zsh or bash).
 

@@ -77,7 +77,7 @@ router.get('/timeout', function (req, res) {
                 res.write('event:almost-timeout\ndata:{"time-left":"60"}\n\n')
             }, ((timeUntilExpiry - 60) * 1000));
         }
-        // gives one and half seconds for frontend to close and display alert message
+        // gives 1.5 seconds for frontend to close and display alert message
         // but that means frontend syncs, then after final sync no more
         // like telling user they're unauthenticated earlier than they actually are; just to be safe
         unauthTimeout = setTimeout(() => {
