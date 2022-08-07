@@ -30,7 +30,7 @@
         "availability":true
     },
     {
-        "name":"small",
+        "name":"medium",
         "cost":22,
         "classification":"Medium",
         "availability":true

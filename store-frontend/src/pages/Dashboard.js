@@ -120,7 +120,7 @@ const Dashboard = function () {
     })
     // cleanup when unmounting
     return () => { sessionEvent.close(); source.cancel(); }
-  }, [setCustomAlert, uploadLocalCart]);
+  }, [setCustomAlert, uploadLocalCart, lockCart, unlockCart]);
 
   return (
     <section>

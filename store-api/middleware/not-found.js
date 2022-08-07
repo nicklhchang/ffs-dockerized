@@ -1,3 +1,5 @@
+// for Postman, frontend handles non-existent route differently
+
 const notFoundMiddleware = function(req,res) {
     res.status(404).json({ msg:"Route does not exist" });
 }

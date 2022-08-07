@@ -32,7 +32,19 @@ const connectDB = async function () {
     }
 }
 
+const connectAndPopulate = async function() {
+    try {
+        await connectDB();
+        if (!(await Item.countDocuments())) {
+            await Item.create(items);
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 module.exports = {
     connectSessionStore,
-    connectDB
+    connectDB,
+    connectAndPopulate
 };
