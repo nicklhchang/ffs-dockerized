@@ -1,11 +1,26 @@
 import React, { useState, useContext, useCallback, useReducer } from 'react'
 import { authReducer, sidebarReducer, cartReducer } from './dashboardReducer';
 import { useAlertContext } from './alertContext';
+import { PropsAD } from './interface'
 
-import axios, { CanceledError } from 'axios'
+import axios, { CanceledError, CancelTokenSource } from 'axios'
 axios.defaults.withCredentials = true; // always send cookie to backend because passport wants
 
-const DashboardContext = React.createContext();
+// const DashboardContext = React.createContext({} as any);
+// https://react-typescript-cheatsheet.netlify.app/docs/basic/getting-started/context/
+const customCreateContext = function <T extends {} | null>() {
+  const dashboardCtx = React.createContext<T | undefined>(undefined);
+  const useCtx = function () {
+    // do useDashboardContext below in here
+    const check = useContext(dashboardCtx)
+    if (check === undefined) {
+      throw new Error("oopsies looks like the application won't even load properly")
+    }
+    return dashboardCtx
+  }
+  return [useCtx, dashboardCtx] as const
+}
+const [useDC, DashboardContext] = customCreateContext<any>();
 
 const stateAuthUser = {
   isAuthenticated: false,
@@ -31,7 +46,7 @@ const stateCart = {
   isCartLocked: false
 }
 
-const DashboardProvider = function ({ children }) {
+const DashboardProvider = function (props: PropsAD) {
   // no useRef's because want re renders whenever these states change
   const [loading, setLoading] = useState(true);
   const [wholeMenu, setWholeMenu] = useState([]);
@@ -53,26 +68,26 @@ const DashboardProvider = function ({ children }) {
   // something like a new reference created for function whenever called, so 'change' cause re-render
 
   // authentication related
-  const authenticate = useCallback(function (user, sessionCookie) {
+  const authenticate = useCallback(function (user: { [key: string]: string}, sessionCookie: string) {
     authDispatch({ type: 'authenticate', payload: { user, sessionCookie } });
   }, [])
 
   const unauthenticate = useCallback(function () {
-    authDispatch({ type: 'unauthenticate' });
+    authDispatch({ type: 'unauthenticate', payload: {} });
   }, [])
 
   // sidebar state
-  const toggleSidebar = useCallback(function (action) {
-    sidebarDispatch({ type: action });
+  const toggleSidebar = useCallback(function (action: string) {
+    sidebarDispatch({ type: action, payload: {} });
   }, [])
 
-  const setFilterOptions = useCallback(function (arr, budget) {
+  const setFilterOptions = useCallback(function (arr: Array<string>, budget: number) {
     // console.log(arr) // ES6 shorthand {arr:arr,budget:budget}
     sidebarDispatch({ type: 'filter', payload: { arr, budget } });
   }, [])
 
   const clearFilterOptions = useCallback(function () {
-    sidebarDispatch({ type: 'clear' });
+    sidebarDispatch({ type: 'clear', payload: {} });
   }, [])
 
   const clearFilter = useCallback(function () {
@@ -84,43 +99,49 @@ const DashboardProvider = function ({ children }) {
   }, [clearFilterOptions, setCheckedOptions, setMaxPrice, toggleSidebar])
 
   // cart state
-  const populateCartInitial = useCallback(function (items) {
+  const populateCartInitial = useCallback(function (items: Array<{[key:string]: string | number}>) {
+    // items is an array of objects
     cartDispatch({ type: 'initial-populate', payload: { items } });
   }, [])
 
   const lockCart = useCallback(function () {
-    cartDispatch({ type: 'lock-changes' })
+    cartDispatch({ type: 'lock-changes', payload: {} })
   }, [])
 
   const unlockCart = useCallback(function () {
-    cartDispatch({ type: 'unlock-changes' })
+    cartDispatch({ type: 'unlock-changes', payload: {} })
   }, [])
 
   const clearChangesOnSync = useCallback(function () {
-    cartDispatch({ type: 'clear-on-sync' })
+    cartDispatch({ type: 'clear-on-sync', payload: {} })
   }, [])
 
-  const mutateLocalCart = useCallback(function (optionM, id) {
+  const mutateLocalCart = useCallback(function (optionM: string, id: string) {
     cartDispatch({ type: 'mutate-local-cart', payload: { optionM, id } })
   }, [])
 
-  const clearLocalCart = useCallback(function (optionC) {
+  const clearLocalCart = useCallback(function (optionC: string) {
     cartDispatch({ type: 'clear-local-cart', payload: { optionC } })
   }, [])
 
-  const loadCart = useCallback(function (cart, controller) {
+  const loadCart = useCallback(function (cart: { [key: string]: number }, controller: AbortController) {
     axios.get('http://localhost:8080/api/v1/browse/cart', { signal: controller.signal })
       .then(function (response) {
         console.log(response.data)
         const { alreadyAuthenticated, user, result } = response.data;
         if (alreadyAuthenticated) {
           authenticate(user, document.cookie)
-          // if empty localCart or new user need to populate; get req on Welcome and Cart fixes
+          // if empty localCart or new user need to populate; get request on Welcome and Cart fixes
           if (!Object.keys(cart).length) {
-            populateCartInitial(result.cart?.items)
+            populateCartInitial(result.cart?.items) // but if they have no cart in database, then nothing (hence .cart?)
           }
-          let prices = {};
-          result.prices.forEach(id_cost => {
+          let prices: { [key: string]: number } = {};
+          // didn't like
+          // type IDCost = { _id:string, cost:number }
+          // result.prices.forEach((id_cost: {[key:string]: IDCost[keyof IDCost]}) => {
+          // didn't like
+          // result.prices.forEach((id_cost: {[key:string]: string | number}) => {
+          result.prices.forEach((id_cost: { _id:string, cost:number }) => {
             prices[id_cost._id] = id_cost.cost;
           });
           // console.log(prices)
@@ -143,7 +164,7 @@ const DashboardProvider = function ({ children }) {
     // setCustomAlert not wrapped in a useCallback
     [authenticate, populateCartInitial, setCustomAlert, unauthenticate])
 
-  const mutateCartCheckLock = useCallback(function (lockStatus, mutation, id, cookie) {
+  const mutateCartCheckLock = useCallback(function (lockStatus: boolean, mutation: string, id: string, cookie: string) {
     if (document.cookie === cookie) {
       lockStatus
         ? setCustomAlert(true, 'please wait a moment for your changes to sync')
@@ -153,7 +174,7 @@ const DashboardProvider = function ({ children }) {
     }
   }, [unauthenticate, mutateLocalCart, setCustomAlert])
 
-  const uploadLocalCart = useCallback(function (source, cslu, cart) {
+  const uploadLocalCart = useCallback(function (source: CancelTokenSource, cslu: {[key:string]:number}, cart: {[key:string]:number}) {
     const notChanged = Object.values(cslu)
       .every((change) => { return change === 0; });
     /** .every() returns true by default if array empty; empty means notChanged true
@@ -163,7 +184,7 @@ const DashboardProvider = function ({ children }) {
      *  because what if other item id's have non-zero value; a change did happen)
      *  if do notChanged (change === 0) takes one non-zero value (e.g. +1) to set to false (correct)
      *  need double negation below as a result */
-     console.log(cslu, Object.values(cslu), notChanged)
+    console.log(cslu, Object.values(cslu), notChanged)
     if (!notChanged) {
       lockCart();
       axios.post('http://localhost:8080/api/v1/browse/cart/sync', {
@@ -225,7 +246,7 @@ const DashboardProvider = function ({ children }) {
     mutateCartCheckLock,
     uploadLocalCart
   }}>
-    {children}
+    {props.children}
   </DashboardContext.Provider>
 }
 
@@ -233,4 +254,8 @@ const useDashboardContext = function () {
   return useContext(DashboardContext);
 }
 
-export { useDashboardContext, DashboardProvider }
+export { 
+  useDashboardContext, 
+  DashboardProvider, 
+  useDC 
+}

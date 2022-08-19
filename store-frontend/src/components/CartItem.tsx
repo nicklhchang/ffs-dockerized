@@ -2,7 +2,17 @@ import React, { } from 'react'
 import { FaMinus, FaPlus } from 'react-icons/fa';
 import { useDashboardContext } from '../app-context/dashboardContext';
 
-const CartItem = React.memo(function ({ id, count, cost }) {
+interface cartItemProps {
+    // because in Cart maps over array which has elements [string, number]
+    // Typescript means must do string | number instead of just string
+    key: string | number
+    id: string | number
+    count: string | number
+    cost: string | number
+}
+
+const CartItem = React.memo(function (props: cartItemProps) {
+    const { id, count, cost } = props;
     const {
         currentSessionCookie,
         isCartLocked,
@@ -14,7 +24,9 @@ const CartItem = React.memo(function ({ id, count, cost }) {
             <div className='menu-item-footer'>
                 <h4>{id}</h4>
                 <h4>Cost per item: {cost}</h4>
-                <h4>Subtotal: {count * cost}</h4>
+                {/* workaround because Typescript enforces string | number on all fields in cartItemProps */}
+                {!isNaN(Number(count)) && !isNaN(Number(cost)) &&
+                    <h4>Subtotal: {Number(count) * Number(cost)}</h4>}
                 <button className='submit-btn' onClick={() => { mutateCartCheckLock(isCartLocked, 'remove-item', id, currentSessionCookie) }}>
                     Remove item
                 </button>

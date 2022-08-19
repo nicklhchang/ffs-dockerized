@@ -20,7 +20,7 @@ router.post('/login', passport.authenticate('local', {
 }));
 
 router.get('/login-success', function (req, res) {
-    console.log(req.session);
+    console.log(req.user, req.session);
     // sessionID: '4zBMIyid4nQiIECaMZ3jjY_C7oRX42X4',
     // session: Session {
     //     cookie: {
@@ -35,7 +35,11 @@ router.get('/login-success', function (req, res) {
     res.json({
         loginSuccess: true,
         // userID:req.session.passport.user,
-        user: req.user
+        user: {
+            _id: req.user._id,
+            username: req.user.username,
+            email: req.user.email
+        }
     });
 })
 

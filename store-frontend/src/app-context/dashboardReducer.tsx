@@ -1,4 +1,25 @@
-const authReducer = function (state, action) {
+import { Dispatch } from './interface'
+
+interface stateAuth {
+    isAuthenticated: boolean,
+    currentUser: object | null,
+    currentSessionCookie: string | null
+}
+
+interface stateSidebar {
+    isSidebarOpen: boolean,
+    sidebarFilterOptions: object | {}
+}
+
+interface stateCart {
+    // localCart is { property:value } => { item._id:count }
+    localCart: {[key:string]:number},
+    // changesSinceLastUpload is { property:value } => { item._id:count }
+    changesSinceLastUpload: {[key:string]:number},
+    isCartLocked: boolean
+}
+
+const authReducer = function (_state: stateAuth, action: Dispatch) {
     switch (action.type) {
         case 'authenticate':
             return {
@@ -18,7 +39,7 @@ const authReducer = function (state, action) {
     }
 }
 
-const sidebarReducer = function (state, action) {
+const sidebarReducer = function (state: stateSidebar, action: Dispatch) {
     switch (action.type) {
         case 'open':
             return {
@@ -49,7 +70,7 @@ const sidebarReducer = function (state, action) {
     }
 }
 
-const cartReducer = function (state, action) {
+const cartReducer = function (state: stateCart, action: Dispatch) {
     const { localCart, changesSinceLastUpload } = state
     // below guarantees local cart and state changes kept in sync; do both at same time
     // https://stackoverflow.com/questions/122102/what-is-the-most-efficient-way-to-deep-clone-an-object-in-javascript
@@ -60,9 +81,10 @@ const cartReducer = function (state, action) {
     switch (action.type) {
         case 'initial-populate':
             const { items } = action.payload
-            const cart = {}
+            // console.log(items) // [{item:string,count:number},...]
+            const cart: { [key:string]:number } = {}
             if (items) { // so won't undefined.map if user does not have a cart
-                items.forEach((obj, index) => {
+                items.forEach((obj:{item:string,count:number}, _index: number) => {
                     // look at cart schema
                     cart[obj.item] = obj.count;
                 });

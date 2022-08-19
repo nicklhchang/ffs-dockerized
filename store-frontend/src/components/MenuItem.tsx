@@ -1,7 +1,16 @@
 import React, { } from 'react'
 import { useDashboardContext } from '../app-context/dashboardContext';
 
-const Item = React.memo(function ({ _id, name, cost, classification }) {
+interface menuItemProps {
+    key: string | number
+    _id: string | number
+    name: string | number
+    cost: number | string
+    classification: string | number
+}
+
+const Item = React.memo(function (props: menuItemProps) {
+    const { _id, name, cost, classification } = props;
     const {
         currentSessionCookie,
         isCartLocked,

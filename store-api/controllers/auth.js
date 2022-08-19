@@ -25,7 +25,11 @@ const register = async function(req,res,next) {
                     return res.json({ 
                         requestSuccess:true,
                         loginSuccess:true,
-                        user:newMember 
+                        user:{
+                            _id: newMember._id,
+                            username: newMember.username,
+                            email: newMember.email
+                        }
                     });
                 });
             })

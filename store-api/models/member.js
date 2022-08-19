@@ -20,7 +20,7 @@ const MemberSchema = new mongoose.Schema({
     password:{
         type:String,
         required:[true,'Please provide a password'],
-        minlength:8
+        // minlength:8 // unhandled
     },
     salt:{
         type:String

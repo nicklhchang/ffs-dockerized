@@ -7,7 +7,7 @@ import SessionOver from '../components/SessionOver';
 import Loading from '../components/Loading';
 import { FaBars } from 'react-icons/fa';
 
-import axios, { CanceledError } from 'axios'
+import axios, { AxiosResponse, CanceledError } from 'axios'
 import MenuSidebar from './MenuSidebar';
 axios.defaults.withCredentials = true; // always send cookie to backend because passport wants
 
@@ -17,7 +17,8 @@ axios.defaults.withCredentials = true; // always send cookie to backend because 
 const Menu = function () {
     const axiosReqLink = 'http://localhost:8080/api/v1/browse/menu';
     const [pageLessOne, setPageLessOne] = useState(0);
-    const [menuPage, setMenuPage] = useState([]);
+    // often times come up to useState to set desired types
+    const [menuPage, setMenuPage] = useState<Array<{ [key: string]: (string | number) }>>([]);
     const [emptyMenu, setEmptyMenu] = useState(false);
     // constantly changing but need re-renders for new part of menu when switch pages
     // const pageLessOne = useRef(0);
@@ -51,7 +52,7 @@ const Menu = function () {
         // menuPage.current = [];
     }, [setWholeMenu, unauthenticate]) // setMenuPage from this component
 
-    const bucket = function (arr) {
+    const bucket = function (arr: Array<{ [key: string]: (string | number) }>) { // for setMenuPage(paginated[num])
         const itemsPerBucket = 5;
         const numBuckets = Math.ceil(arr.length / itemsPerBucket);
         const bucketedArr = Array.from({ length: numBuckets }, (_, i) => {
@@ -61,7 +62,7 @@ const Menu = function () {
         return bucketedArr
     }
 
-    const handleAxiosGetThen = useCallback(function (response) {
+    const handleAxiosGetThen = useCallback(function (response: AxiosResponse) { // get on this later
         console.log(response.data);
         const { alreadyAuthenticated, user, result } = response.data;
         if (alreadyAuthenticated) {
@@ -169,13 +170,19 @@ const Menu = function () {
         // reduce does not work because pass previous element to next (which is an array, not number)
         // number is needed because Array.prototype.length returns a number
         let sum = 0;
-        wholeMenu.forEach((arr, index) => {
+        wholeMenu.forEach((arr: Array<{ [key: string]: (string | number) }>, _index: number) => {
             sum += arr.length;
         });
         return sum;
     }
 
-    const handlePaginateButtons = function ({ type, pageNum }) {
+    interface paginateInputTypes {
+        type: string
+        pageNum: number | null
+    }
+
+    const handlePaginateButtons = function (params: paginateInputTypes) {
+        const { type, pageNum } = params;
         // console.log(currentSessionCookie,document.cookie)
         // document.cookie is not an array because only one cookie for now
         // if array grab using document.cookie['connect.sid']
@@ -193,8 +200,10 @@ const Menu = function () {
                     setMenuPage(wholeMenu[pageLessOne + 1]);
                     break;
                 case 'custom':
-                    setPageLessOne(pageNum);
-                    setMenuPage(wholeMenu[pageNum]);
+                    if (!isNaN(Number(pageNum))) {
+                        setPageLessOne(Number(pageNum));
+                        setMenuPage(wholeMenu[Number(pageNum)]);
+                    }
                     break;
                 default:
                     throw new Error('no type matched');
@@ -207,8 +216,8 @@ const Menu = function () {
     return (
         <section>
             {alert.shown && <Alert />}
-            <SessionOver />
-            <Loading />
+            {!isAuthenticated && !loading && <SessionOver />}
+            {!!loading && <Loading />}
             {!!isAuthenticated && !loading && <section>
                 {isSidebarOpen && <MenuSidebar />}
                 {!isSidebarOpen &&
@@ -221,8 +230,15 @@ const Menu = function () {
                     <div className='menu-center'>
                         {/* do not ever use array index as key */}
                         {menuPage.map((item) => {
+                            // necessary for Typescript
+                            let prop = {
+                                _id: item._id,
+                                name: item.name,
+                                cost: item.cost,
+                                classification: item.classification
+                            }
                             return (
-                                <MenuItem key={item._id} {...item} />
+                                <MenuItem key={item._id} {...prop} />
                             );
                         })}
                     </div>
@@ -233,10 +249,10 @@ const Menu = function () {
                                 onClick={() => { handlePaginateButtons({ type: 'prev', pageNum: null }) }}>
                                 prev
                             </button>}
-                        {wholeMenu.map((arr, menuIndex) => {
+                        {wholeMenu.map((arr: Array<{ [key: string]: (string | number) }>, menuIndex: number) => {
                             // in paginating with 2d array, using array index as key no problem; order no matter
                             return (
-                                <button className={ (menuIndex === pageLessOne) ? 'active-btn' : '' }
+                                <button className={(menuIndex === pageLessOne) ? 'active-btn' : ''}
                                     key={arr[0]._id}
                                     onClick={() => { handlePaginateButtons({ type: 'custom', pageNum: menuIndex }) }}>
                                     {menuIndex + 1}

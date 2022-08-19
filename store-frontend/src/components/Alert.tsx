@@ -28,7 +28,7 @@ const Alert = function() {
         // cleanup whenever something in dep array changes or component unmounts,
         // then useEffect() sets up new time out
         return () => {clearTimeout(countdown);}
-    },[alertOver,alert.shown]);
+    },[alertOver,alert.numAlerts]);
     
     return (
         <p className='alert alert-danger'>

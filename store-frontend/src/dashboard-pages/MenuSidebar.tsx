@@ -24,9 +24,9 @@ const MenuSidebar = function () {
         clearFilter
     } = useDashboardContext();
 
-    const onCheck = function (index) {
+    const onCheck = function (index: number) {
         if (document.cookie === currentSessionCookie) {
-            const nextCheckedOptions = checkedOptions.map((bool, i) => {
+            const nextCheckedOptions = checkedOptions.map((bool: boolean, i: number) => {
                 return (index === i ? !bool : bool);
             });
             console.log(nextCheckedOptions)
@@ -37,7 +37,7 @@ const MenuSidebar = function () {
         }
     }
 
-    const onSlide = function (event) {
+    const onSlide = function (event: React.ChangeEvent<HTMLInputElement>) {
         event.preventDefault();
         console.log(event.target.value)
         if (document.cookie === currentSessionCookie) {
@@ -51,17 +51,17 @@ const MenuSidebar = function () {
     // onSubmitFilter and onClearFilter with toggleSidebar('close') prevents
     // re-rendering Menu's useEffect (es-lint disable so does not run useEffect 
     // on every state change); re running useEffect; brief moment of unauthenticated
-    const onSubmitFilter = function (event) {
-        event.preventDefault();
+    const onSubmitFilter = function (event: React.MouseEvent<HTMLButtonElement>) {
+        event.preventDefault(); // could be source of bugs if there is an equivalent to preventDefault()
         // auth status checked by axios get to backend
-        const filterArr = [];
+        const filterArr: Array<string> = [];
         // use .every() so if every bool is false (empty arr) populate with full
         // takes one option to be true to 'ruin' it; don't select all
-        const selectAll = checkedOptions.every((option) => {return !option;});
+        const selectAll = checkedOptions.every((option: string) => {return !option;});
         if (selectAll) {
             menuOptionsEnum.forEach((option) => {filterArr.push(option)});
         } else {
-            checkedOptions.forEach((bool, index) => {
+            checkedOptions.forEach((bool: boolean, index: number) => {
                 if (bool) { filterArr.push(menuOptionsEnum[index]) }
             });
         }
@@ -70,8 +70,8 @@ const MenuSidebar = function () {
         toggleSidebar('close');
     }
 
-    const onClearFilter = function (event) {
-        event.preventDefault();
+    const onClearFilter = function (event: React.MouseEvent<HTMLButtonElement>) {
+        event.preventDefault(); // could be source of bugs if there is an equivalent to preventDefault()
         clearFilter();
     }
 
@@ -139,7 +139,7 @@ const MenuSidebar = function () {
             {/* ternary or boolean cast like below prevents rendering 0 */}
             {!!Object.keys(sidebarFilterOptions).length && <div className='sidebar-form'>
                 <h4>Current menu types with budget {sidebarFilterOptions.budgetPrice}:</h4>
-                {sidebarFilterOptions.mealTypes.map((type) => {
+                {sidebarFilterOptions.mealTypes.map((type: string) => {
                     return (<li key={type}>{type}</li>);
                 })}
             </div>}

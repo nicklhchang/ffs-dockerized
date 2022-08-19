@@ -45,7 +45,7 @@ const Login = function () {
   lastCookie.current = currentSessionCookie;
 
   // just being a bit fancy and using useCallback instead of doing axios get request in useEffect
-  const fetchAuthStatusLogin = useCallback(function (controller) {
+  const fetchAuthStatusLogin = useCallback(function (controller: AbortController) {
     // on first render of this route, check if already have active cookie, if so redirect straight to dashboard
     // btw, useEffect does not like async await unless run an async function inside useEffect
     if (!(document.cookie === lastCookie.current)) {
@@ -97,7 +97,7 @@ const Login = function () {
     return () => { controller.abort(); }
   }, [clearLocalCart, clearFilter, fetchAuthStatusLogin]);
 
-  const submitLoginCredentials = async function (event) {
+  const submitLoginCredentials = async function (event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     /* https://stackoverflow.com/questions/42803394/cors-credentials-mode-is-include
     https://stackoverflow.com/questions/68793536/why-cant-i-use-a-wildcard-on-access-control-allow-headers-when-allow-credenti

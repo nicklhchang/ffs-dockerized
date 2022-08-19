@@ -10,6 +10,7 @@ axios.defaults.withCredentials = true;
 
 const Cart = function () {
   const {
+    loading,
     setLoading,
     itemPrices,
     isAuthenticated,
@@ -33,7 +34,7 @@ const Cart = function () {
   return (
     <section>
       {alert.shown && <Alert />}
-      <SessionOver />
+      {!isAuthenticated && !loading && <SessionOver />}
       {isAuthenticated && <section>
         {!Object.keys(localCart).length &&
           <section>
@@ -43,14 +44,15 @@ const Cart = function () {
         {!!Object.keys(localCart).length &&
           <section className='cart'>
             <div>
-              {Object.entries(localCart).map((id_count, index) => {
-                let prop = {
-                  id: id_count[0],
-                  count: id_count[1],
-                  cost: itemPrices[id_count[0]]
-                };
-                return <CartItem key={id_count[0]} {...prop} />;
-              })}
+              {Object.entries<number>(localCart).map(
+                (id_count: Array<(string | number)>, _index: number) => {
+                  let prop = {
+                    id: id_count[0],
+                    count: id_count[1],
+                    cost: itemPrices[id_count[0]]
+                  };
+                  return <CartItem key={id_count[0]} {...prop} />;
+                })}
             </div>
           </section>}
       </section>}

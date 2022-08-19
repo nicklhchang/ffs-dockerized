@@ -48,15 +48,20 @@ const Dashboard = function () {
   // for expanding and closing navbar
   const [showLinks, setShowLinks] = useState(false);
   // note that ref={} in JSX CANNOT be conditionally rendered
-  const linksContainerRef = useRef(null);
-  const linksRef = useRef(null);
+  const linksContainerRef = useRef<HTMLInputElement>(null);
+  const linksRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     console.log('renders dashboard')
-    const linksHeight = linksRef.current.getBoundingClientRect().height;
-    if (showLinks) {
-      linksContainerRef.current.style.height = `${linksHeight}px`;
-    } else {
-      linksContainerRef.current.style.height = '0px';
+    let linksHeight = 0;
+    if (linksRef.current !== null) {
+      linksHeight = linksRef.current.getBoundingClientRect().height;
+    }
+    if (linksContainerRef.current !== null) {
+      if (showLinks) {
+        linksContainerRef.current.style.height = `${linksHeight}px`;
+      } else {
+        linksContainerRef.current.style.height = '0px';
+      }
     }
   }, [showLinks]);
 
@@ -112,7 +117,7 @@ const Dashboard = function () {
       // console.log(parsed, parsed["time-left"])
       setCustomAlert(true, `${parsed["time-left"]} seconds left. No rush :). Just using server-sent events.`)
     });
-    
+
     // oopsies close sse stream on server error
     sessionEvent.addEventListener("error", (event) => {
       console.log(`gracefully handled`, event);

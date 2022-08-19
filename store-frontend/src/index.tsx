@@ -7,7 +7,11 @@ import { AlertProvider } from './app-context/alertContext';
 import { DashboardProvider } from './app-context/dashboardContext';
 import ComposeProviders from './app-context/context';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const element = document.getElementById('root');
+if (!element) {
+  throw new Error('oops couldn\'t even get HTMLElement')
+}
+const root = ReactDOM.createRoot(element);
 root.render(
   <React.StrictMode>
     {/* right most in array below is most nested; need alerts for dashboardContext */}
@@ -16,6 +20,8 @@ root.render(
     </ComposeProviders>
   </React.StrictMode>
 );
+
+// can change default port 3000 in node_modules/react-scripts/scripts/start.js
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

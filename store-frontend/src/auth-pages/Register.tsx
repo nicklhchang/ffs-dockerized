@@ -27,7 +27,7 @@ const Login = function () {
     clearFilter();
   }, [clearLocalCart, clearFilter])
 
-  const submitRegisterCredentials = async function (event) {
+  const submitRegisterCredentials = async function (event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (pwdVerify !== password) {
       setCustomAlert(true, 'passwords don\'t match');
